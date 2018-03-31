@@ -3,6 +3,7 @@ package com.example.lasertest1;
 /**
  * Created by Ashwini on 07-03-2018.
  */
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.bluetooth.BluetoothAdapter;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Button;
@@ -19,11 +21,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
+
+import static com.example.lasertest1.MainActivity.f;
 import static java.util.UUID.fromString;
 
-public class BluetoothConnectionActivity extends AppCompatActivity {
+public class BluetoothConnectionActivity extends Activity{
 
     TextView myLabel;
     EditText myTextbox;
@@ -42,19 +48,20 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.bluetooth_connection);
-        Button openButton=(Button)findViewById(R.id.open);
+      //  this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+       //setContentView(R.layout.bt_back);
+
+      /*  Button openButton=(Button)findViewById(R.id.open);
         Button sendButton = (Button)findViewById(R.id.SEND);
         Button closeButton = (Button)findViewById(R.id.close);
         myLabel = (TextView)findViewById(R.id.label);
         myTextbox = (EditText)findViewById(R.id.entry);
-
+*/
         //Open Button
-        openButton.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
-                try
+
+
+
+        try
                 {
                     findBT();
 
@@ -66,7 +73,7 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
                 }
                 catch (Exception ex) { }
             }
-        });
+
 
         //Send Button
         /*sendButton.setOnClickListener(new View.OnClickListener()
@@ -82,18 +89,8 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
         });
 */
         //Close button
-        closeButton.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
-                try
-                {
-                    closeBT();
-                }
-                catch (IOException ex) { }
-            }
-        });
-    }
+
+
 
     void findBT()
     {
@@ -117,7 +114,7 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
                 if(device.getName().equals("HC-05"))//name of bt comes here
                 {
                     mmDevice = device;
-                    myLabel.setText("Bluetooth Device Found");
+//                    myLabel.setText("Bluetooth Device Found");
                     break;
                 }
             }
@@ -136,76 +133,70 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
         mmSocket.connect();
         Log.d("bt connect",mmSocket.toString());
         mmInputStream = mmSocket.getInputStream();
-        myLabel.setText("Bluetooth Opened");
+//        myLabel.setText("Bluetooth Opened");
         beginListenForData();
 
         //else {myTextbox.setText("wrong uuid");}
     }
 
-    void beginListenForData()
-    {
+    void beginListenForData() {
+        Log.d("f before bt",String.valueOf(f));
+
         final Handler handler = new Handler();
         final byte delimiter = 59; //This is the ASCII code for a newline character
 
         stopWorker = false;
         readBufferPosition = 0;
         readBuffer = new byte[1024];
-        workerThread = new Thread(new Runnable()
-        {
-            public void run()
-            {
-                while(!Thread.currentThread().isInterrupted() && !stopWorker)
-                {
-                    try
-                    {
-                        int bytesAvailable = mmInputStream.available();
-                        if(bytesAvailable > 0)
-                        {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            mmInputStream.read(packetBytes);
-                            for(int i=0;i<bytesAvailable;i++)
-                            {
-                                byte b = packetBytes[i];
-                                if(b == delimiter)
-                                {
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    data = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
-                                    // if(data.equals("example"))
-                                    handler.post(new Runnable()
-                                    {
-                                        public void run()
-                                        {
-                                            myTextbox.setText(data);
-                                            Log.d("read data",data);
-                                        }
-                                    });
-                                    if(data.equals("example"))
-                                    {
-                                        startService(new Intent(BluetoothConnectionActivity.this, CamService.class));
-                                       break;
-                                    }
 
-                                }
-                                else
-                                {
-                                    readBuffer[readBufferPosition++] = b;
+            workerThread = new Thread(new Runnable() {
+                public void run() {
+                    while (!Thread.currentThread().isInterrupted() && !stopWorker) {
+                        try {
+                            int bytesAvailable = mmInputStream.available();
+                            if (bytesAvailable > 0) {
+                                byte[] packetBytes = new byte[bytesAvailable];
+                                mmInputStream.read(packetBytes);
+                                for (int i = 0; i < bytesAvailable; i++) {
+                                    byte b = packetBytes[i];
+                                    if (b == delimiter) {
+                                        byte[] encodedBytes = new byte[readBufferPosition];
+                                        System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                        data = new String(encodedBytes, "US-ASCII");
+                                        readBufferPosition = 0;
+                                        // if(data.equals("example"))
+                                        handler.post(new Runnable() {
+                                            public void run() {
+//                                                myTextbox.setText(data);
+                                                Log.d("read data", data);
+                                            }
+                                        });
+                                        if (data.equals("example")) {
+                                            startService(new Intent(BluetoothConnectionActivity.this, CamService.class));
+                                            f = 1;
+                                            Log.d("f in btact", String.valueOf(f));
+                                            closeBT();
+                                            //moveTaskToBack(true);
+                                           finish();
+
+                                                break;
+                                        }
+
+                                    } else {
+                                        readBuffer[readBufferPosition++] = b;
+                                    }
                                 }
                             }
+                        } catch (IOException ex) {
+                            stopWorker = true;
                         }
                     }
-                    catch (IOException ex)
-                    {
-                        stopWorker = true;
-                    }
                 }
-            }
-        });
+            });
 
-        workerThread.start();
+            workerThread.start();
 
-    }
+        }
 
     /*
     void sendData() throws IOException
@@ -215,13 +206,18 @@ public class BluetoothConnectionActivity extends AppCompatActivity {
         mmOutputStream.write(msg.getBytes());
         myLabel.setText("Data Sent");
     }
+
 */
+    @Override
+    public void onResume(){
+       finish();super.onResume();}
     void closeBT() throws IOException
     {
         stopWorker = true;
-        mmOutputStream.close();
+//        mmOutputStream.close();
         mmInputStream.close();
         mmSocket.close();
-        myLabel.setText("Bluetooth Closed");
+
+//        myLabel.setText("Bluetooth Closed");
     }
 }

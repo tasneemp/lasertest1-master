@@ -70,7 +70,7 @@ public final class HiddenCameraUtils {
 
         try {
             if (!fileToSave.exists()) fileToSave.createNewFile();
-            //out = new FileOutputStream(fileToSave);
+           // out = new FileOutputStream(fileToSave);
             String root = Environment.getExternalStorageDirectory().toString();
             File myDir = new File(root + "/saved_images");
             myDir.mkdirs();
@@ -78,6 +78,7 @@ public final class HiddenCameraUtils {
             String format = simpleDateFormat.format(new Date());
             String fname = "Image-"+format+".jpg";
             File file = new File (myDir, fname);
+
             if (file.exists ())
                 file.delete ();
                 out = new FileOutputStream(file);

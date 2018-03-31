@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     Mat imageMat;
     //WindowManager mWindowManager;
-int f=0;
+static int f=0;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -71,7 +71,7 @@ int f=0;
             @Override
             public boolean onTouch(View arg0, MotionEvent arg1) {
                 if (arg1.getAction()==MotionEvent.ACTION_DOWN)
-                    Toast.makeText(MainActivity.this,"pressed test"+bt.getX()+bt.getY(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"pressed test",Toast.LENGTH_SHORT).show();
 
                 else
                     Toast.makeText(MainActivity.this,"not pressed",Toast.LENGTH_SHORT).show();
@@ -103,10 +103,10 @@ int f=0;
     {
         startActivity(new Intent(MainActivity.this,BluetoothConnectionActivity.class));
         Log.d("data", data);
-        if(data.equals("example")){
+       /* if(data.equals("example")){
             Log.d("if", "here"+data);
             startService(new Intent(MainActivity.this, CamService.class));}
-
+*/
         }
 
 
@@ -118,7 +118,7 @@ int f=0;
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
                 Log.e(msg, "coordinates in activity");
                 //stopService(new Intent(MainActivity.this,CamService.class));
-                f=1;
+                //f=1;
             }
         }
     };

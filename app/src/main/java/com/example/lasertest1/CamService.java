@@ -78,8 +78,11 @@ public class CamService extends HiddenCameraService {
                 mCameraConfig.getImageFormat());
         */
         Log.d("Image capture", imageFile.length() + "");
+
+
         stopSelf();
         startActivity(new Intent(CamService.this,TouchActivity.class));
+
     }
 
     @Override

@@ -519,5 +519,6 @@ private double angle(Point p1, Point p2, Point p0) {
             Log.d("ifcon","free cam");
         }
         Log.d("outsideifcon","free cam");
+
     }
 }

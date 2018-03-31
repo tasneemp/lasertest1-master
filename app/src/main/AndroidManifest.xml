@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:largeHeap="true" >
 
-    <activity android:name=".MainActivity">
+    <activity android:name=".MainActivity" android:noHistory="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +26,8 @@
 
         <activity android:name=".TouchActivity"></activity>
         <activity android:name=".PreferenceSettingActivity"></activity>
-        <activity android:name=".BluetoothConnectionActivity"></activity>
+        <activity android:name=".BluetoothConnectionActivity"
+            android:theme="@android:style/Theme.NoDisplay"></activity>
 
 
         <service android:name=".CamService"/>

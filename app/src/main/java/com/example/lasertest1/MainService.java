@@ -164,21 +164,24 @@ public class MainService extends Service{//} implements View.OnTouchListener, Vi
             }
             int x1=(int)x;
             int y1=(int)y;
-            os.write(("input tap " + y1 + " " + x1).getBytes("ASCII"));
+            os.write(("input tap " + x1 + " " + y1).getBytes("ASCII"));
             Log.d("touched here v1", x1 + " " + y1);
 
             os.flush();
             os.close();
-            sh.waitFor();
-            new Timer().schedule(new TimerTask() {
+           // sh.waitFor();
+//            Log.d("touched here v2", x1 + " " + y1);
+           new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    // this code will be executed after 2 seconds
+                    // this code will be executed after 5 seconds
                 }
             }, 5000);
+            Log.d("touched here v3", x1 + " " + y1);
+
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         stopSelf();
