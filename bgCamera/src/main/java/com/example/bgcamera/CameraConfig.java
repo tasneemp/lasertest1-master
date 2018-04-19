@@ -13,7 +13,7 @@ public final class CameraConfig {
     private Context mContext;
 
     @CameraResolution.SupportedResolution
-    private int mResolution = CameraResolution.MEDIUM_RESOLUTION;
+    private int mResolution = CameraResolution.HIGH_RESOLUTION;
 
     @CameraFacing.SupportedCameraFacing
     private int mFacing = CameraFacing.REAR_FACING_CAMERA;

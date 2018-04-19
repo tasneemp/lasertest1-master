@@ -1,5 +1,7 @@
 package com.example.lasertest1;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,13 +24,15 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
-import static com.example.lasertest1.BluetoothConnectionActivity.data;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
     Mat imageMat;
+    private static Context context;
     //WindowManager mWindowManager;
-static int f=0;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -49,76 +53,76 @@ static int f=0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        //Intent intent = new Intent(this, test.class);
-        //startActivity(intent);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter("intentkey"));
-       // mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-       final Button bt=(Button)findViewById(R.id.button);
-        bt.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View arg0, MotionEvent arg1) {
-                if (arg1.getAction()==MotionEvent.ACTION_DOWN)
-                    Toast.makeText(MainActivity.this,"pressed"+bt.getX()+bt.getY(),Toast.LENGTH_SHORT).show();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter("intentkey1"));
+        MainActivity.context = getBaseContext();
 
-                else
-                    Toast.makeText(MainActivity.this,"not pressed",Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
         final Button bt1=(Button)findViewById(R.id.test);
         bt1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View arg0, MotionEvent arg1) {
                 if (arg1.getAction()==MotionEvent.ACTION_DOWN)
-                    Toast.makeText(MainActivity.this,"pressed test",Toast.LENGTH_SHORT).show();
-
-                else
-                    Toast.makeText(MainActivity.this,"not pressed",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"Pressed Test",Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
 
     }
-
-
-    public void start(View v)
+    public static Context getAppContext()
     {
-        startService(new Intent(MainActivity.this, CamService.class));
-        /*if(f==1)
-            startActivity(new Intent(MainActivity.this,TouchActivity.class));*/
+        return MainActivity.context;
     }
 
-
-
-
-    public void startTouchActivity(View v)
+    public static void start()
     {
-        Intent myIntent = new Intent(MainActivity.this,
-                TouchActivity.class);
-        startActivity(myIntent);
+        Log.i("Reached start","came in start");
+
+        Thread t = new Thread(){
+            public void run(){
+                context.startService(new Intent(getAppContext(),CamService.class));
+            }
+
+        };
+        t.start();
     }
 
-    public void bluetooth(View v)
-    {
-        startActivity(new Intent(MainActivity.this,BluetoothConnectionActivity.class));
-        Log.d("data", data);
-       /* if(data.equals("example")){
-            Log.d("if", "here"+data);
-            startService(new Intent(MainActivity.this, CamService.class));}
-*/
+    public static void startThread(View v) {
+        List<UUID> uuidCandidates = null;
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        BluetoothDevice device = null;
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device1 : pairedDevices) {
+                if (device1.getName().equals("HC-05"))//name of bt comes here
+                {
+                    device = device1;
+                    break;
+                }
+            }
+
         }
+        final Server s = new Server(device, true, mBluetoothAdapter, uuidCandidates, getAppContext());
+        Thread s1 = new Thread() {
+            public void run() {
 
+                try {
+                    s.connect();
+                } catch (Exception e) {
+                }
+
+            }
+        };
+        s1.start();
+    }
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("intentkey")) {
+            if (intent.getAction().equals("intentkey1"))
+            {
                 String msg = intent.getStringExtra("key");
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-                Log.e(msg, "coordinates in activity");
-                //stopService(new Intent(MainActivity.this,CamService.class));
-                //f=1;
+                Log.e(msg, "in main activity");
             }
         }
     };

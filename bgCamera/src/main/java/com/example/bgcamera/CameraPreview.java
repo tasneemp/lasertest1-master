@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.WINDOW_SERVICE;
 
 
@@ -130,11 +131,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 throw new RuntimeException("Invalid camera resolution.");
         }
         parameters.setPictureSize(cameraSize.width, cameraSize.height);
-
+        parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_SHADE);
         requestLayout();
 
-        mCamera.setParameters(parameters);
 
+        mCamera.setParameters(parameters);
+        Log.i("cambright", "Supported Exposure Modes:" + parameters.get("exposure-mode-values"));
+        Log.i("cambright", "Supported White Balance Modes:" + parameters.get("whitebalance-values"));
+        Log.i("tag", "Exposure setting = " + parameters.get("exposure"));
+        Log.i("tag", "White Balance setting = " + parameters.get("whitebalance"));
         try {
             mCamera.setDisplayOrientation(90);
             mCamera.setPreviewDisplay(surfaceHolder);
@@ -184,9 +189,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Mat src=new Mat();
         Utils.bitmapToMat(src1,src);
         Mat blurred = src.clone();
-        //   Imgproc.medianBlur(src, blurred, 9);
+
         Imgproc.cvtColor(src, src, Imgproc.COLOR_RGBA2RGB);
-        //Imgproc.cvtColor(rgba, rgba, Imgproc.COLOR_BGRA2GRAY);
+
         Log.d("channels", String.valueOf(src.channels())+String.valueOf(src));
 
         Imgproc.bilateralFilter(src,blurred,11,17,17,Core.BORDER_DEFAULT);
@@ -229,11 +234,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             for (MatOfPoint contour : contours) {
                 MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
 
-                double area = Imgproc.contourArea(contour);
+                double area = Imgproc.contourArea(contour); //obtain contour area
                 approxCurve = new MatOfPoint2f();
-                Imgproc.approxPolyDP(temp, approxCurve,
+                Imgproc.approxPolyDP(temp, approxCurve,     //Approximates a polygonal curve with the specified precision.
                         Imgproc.arcLength(temp, true) * 0.02, true);
-
+                //if the total number of curves is 4, it is likely to be quadrilateral and we also check if the area of this contour is maximum,
+                //it is most likely to be our phone screen.
                 if (approxCurve.total() == 4 && area >= maxArea) {
                     double maxCosine = 0;
 
@@ -269,11 +275,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Mat test=blurred.clone();
         blurred.convertTo(test,CvType.CV_32FC2);
         Log.d("test", String.valueOf(test));
-        //Mat src_mat = new Mat(4, 4, CvType.CV_32FC2);
-        //Mat dst_mat = new Mat(4, 4, CvType.CV_32FC2);
 
-        //src_mat.put(0, 0, rect.tl().x, rect.tl().y, rect.br().x,rect.tl().y, rect.br().x, rect.br().y, rect.tl().x, rect.br().y);
-        //dst_mat.put(0, 0, 0.0, 0.0, width-1, 0.0, width-1, height-1, 0.0, height-1);
         Point tr=new Point(rect.br().x,rect.tl().y);
         Point bl=new Point(rect.tl().x,rect.br().y);
         MatOfPoint2f src_mat = new MatOfPoint2f(
@@ -299,7 +301,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         blurred.release();
         src.release();
         test.release();
-        //return src;
         return doc;
     }
 
@@ -324,7 +325,7 @@ private double angle(Point p1, Point p2, Point p0) {
         Mat frameH;
         Mat frameV;
         Mat frameS;
-
+        Mat frameH1,frameH2;
         // Convert it to HSV
         //Log.d("")
         Imgproc.cvtColor(rgba, frame, Imgproc.COLOR_RGB2HSV);
@@ -336,10 +337,11 @@ private double angle(Point p1, Point p2, Point p0) {
         frameH = mChannels.get(0);
         frameS = mChannels.get(1);
         frameV = mChannels.get(2);
-
+        frameH1=frameH;frameH2=frameH;
         // Apply a threshold to each component
         Imgproc.threshold(frameH, frameH, 160, 180, Imgproc.THRESH_BINARY);
-        // Imgproc.threshold(frameS, frameS, 0, 100, Imgproc.THRESH_BINARY);
+       // Imgproc.threshold(frameH, frameH2, 0, 10, Imgproc.THRESH_BINARY);
+        //Core.bitwise_or(frameH1,frameH2,frameH);
         Imgproc.threshold(frameV, frameV, 200, 256, Imgproc.THRESH_BINARY);
         // Perform an AND operation
         Core.bitwise_and(frameH, frameV, frame);
@@ -374,8 +376,8 @@ private double angle(Point p1, Point p2, Point p0) {
         return resultBitmap;
 
     }
-/*
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
+ /*       @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
      private Bitmap detectLight(Bitmap bitmap, double gaussianBlurValue) {
 
         Mat rgba = new Mat();
@@ -390,6 +392,27 @@ private double angle(Point p1, Point p2, Point p0) {
         //Core.inRange(hsv,new Scalar(0,0,50),new Scalar(0,0,255),mask);
         Core.MinMaxLocResult minMaxLocResultBlur = Core.minMaxLoc(grayScaleGaussianBlur);
         Imgproc.circle(rgba, minMaxLocResultBlur.maxLoc, 5, new Scalar(255), 1);
+
+
+        double x1 = minMaxLocResultBlur.maxLoc.x;
+        double y1=minMaxLocResultBlur.maxLoc.y;
+        coord=Double.toString(x1)+"x"+Double.toString(y1);
+
+        x=(int)x1;
+        y=(int)y1 ;
+        hofimage=bitmap.getHeight();
+        wofimage=bitmap.getWidth();
+
+        Intent intent1=new Intent("intentkey");
+        intent1.putExtra("key",x+"x"+y);
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent1);
+        Bitmap resultBitmap = Bitmap.createBitmap(rgba.cols(), rgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(rgba, resultBitmap);
+        rgba.release();
+  //      frame.release();
+
+        return resultBitmap;
+
 
         x = (int)minMaxLocResultBlur.maxLoc.x;
         y=(int)minMaxLocResultBlur.maxLoc.y;

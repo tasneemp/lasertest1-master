@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">lasertest1</string>
-    <string name="string1">Welcome</string>
+    <string name="app_name">LaserCast</string>
+    <string name="string1">Welcome to LaserCast</string>
     <string name="string2">Start</string>
     <string name="string3">Stop</string>
     <string name="click">CLICK</string>

@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:largeHeap="true" >
+        android:largeHeap="true">
+
+
 
     <activity android:name=".MainActivity" android:noHistory="true">
         <intent-filter>
@@ -26,8 +29,6 @@
 
         <activity android:name=".TouchActivity"></activity>
         <activity android:name=".PreferenceSettingActivity"></activity>
-        <activity android:name=".BluetoothConnectionActivity"
-            android:theme="@android:style/Theme.NoDisplay"></activity>
 
 
         <service android:name=".CamService"/>

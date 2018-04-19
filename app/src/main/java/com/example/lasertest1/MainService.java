@@ -5,6 +5,7 @@ package com.example.lasertest1;
  */
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Camera;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.Log;
@@ -87,57 +88,7 @@ public class MainService extends Service{//} implements View.OnTouchListener, Vi
         mIsTouchDown = false;
         proceedClick();
         Log.d("rchserv","here");
-      //  mLastInput = null;
-
-       // initViews();
-        //initListeners();
-        //centerTargetInScreen();
-
-//        mWindowManager.addView(mReducedView, mParams);
-    }
-
-    /**
-     * Initialize the views
-     */
-    private void initViews() {
-        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-
-        mControlView = (LinearLayout) inflater.inflate(R.layout.full_control, null);
-        mReducedView = (LinearLayout) inflater.inflate(R.layout.reduced_control, null);
-        mTargetView = (LinearLayout) inflater.inflate(R.layout.target, null);
-
-        mParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-        mParams.gravity = Gravity.TOP | Gravity.LEFT;
-
-        mTargetParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-        mTargetParams.gravity = Gravity.TOP | Gravity.LEFT;
-    }
-
-    /**
-     * Initialize the listeners
-     */
-//    private void initListeners() {
-//        mControlView.findViewById(R.id.exit_button).setOnClickListener(this);
-//        mControlView.findViewById(R.id.minus_button).setOnClickListener(this);
-//        mControlView.findViewById(R.id.button_click).setOnClickListener(this);
-//
-//        mControlView.findViewById(R.id.arrow_up).setOnTouchListener(this);
-//        mControlView.findViewById(R.id.arrow_down).setOnTouchListener(this);
-//        mControlView.findViewById(R.id.arrow_left).setOnTouchListener(this);
-//        mControlView.findViewById(R.id.arrow_right).setOnTouchListener(this);
-//
-//        mReducedView.setOnTouchListener(getNewReducedControlListener());
-//    }
+     }
 
     private void proceedClick() {
         Process sh = null;
@@ -150,17 +101,22 @@ public class MainService extends Service{//} implements View.OnTouchListener, Vi
             int maxX = mdispSize.x;
             int maxY = mdispSize.y;
             Log.d("max",maxX+" "+maxY);
-
+            int height_of_image= CameraPreview.hofimage;
+            int width_of_image=CameraPreview.hofimage;
+            int x_in_image=CameraPreview.x;
+            int y_in_image=CameraPreview.y;
             double x=0,y=0;
-            if(CameraPreview.hofimage!=0)
+            if(height_of_image!=0)
             {
-                x = ((double)CameraPreview.x / CameraPreview.wofimage) * maxY;
-                y = ((double)CameraPreview.y / CameraPreview.hofimage) * maxX;
+                x=height_of_image-y_in_image;
+                y=x_in_image;
+                x = (x / height_of_image) * maxX;
+                y = (y / width_of_image) * maxY;
 
-                Log.d("hwimg",CameraPreview.hofimage+" "+CameraPreview.wofimage);
-                Log.d("xyprev",CameraPreview.x+" "+CameraPreview.y);
+                Log.d("hwimg",height_of_image+" "+width_of_image);
+                Log.d("xyprev",x_in_image+" "+y_in_image);
                 Log.d("xynew",x+" "+y);
-                //callfunction
+                //callfunctionhu
             }
             int x1=(int)x;
             int y1=(int)y;
@@ -169,15 +125,14 @@ public class MainService extends Service{//} implements View.OnTouchListener, Vi
 
             os.flush();
             os.close();
-           // sh.waitFor();
-//            Log.d("touched here v2", x1 + " " + y1);
+
            new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     // this code will be executed after 5 seconds
                 }
             }, 5000);
-            Log.d("touched here v3", x1 + " " + y1);
+            Log.d("touched here v3", y1 + " " + x1);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -186,173 +141,4 @@ public class MainService extends Service{//} implements View.OnTouchListener, Vi
         }
         stopSelf();
     }
-
-    /**
-     * Place the cursor in the center of the screen
-     */
-    private void centerTargetInScreen() {
-        mTargetX = mWindowManager.getDefaultDisplay().getWidth() / 2;
-        mTargetY = mWindowManager.getDefaultDisplay().getHeight() / 2;
-        mTargetParams.x = mTargetX;
-        mTargetParams.y = mTargetY;
-    }
-
-    /**
-     * Generate a listener for the reduced control view :
-     * drag and drop, launch app on click
-     */
-  /*  private View.OnTouchListener getNewReducedControlListener() {
-        return new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
-            private long lastTouchDown;//time of the last touch down for the reduced view
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                //move event :
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = mParams.x;
-                        initialY = mParams.y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        lastTouchDown = System.currentTimeMillis();
-                        return true;
-                    case MotionEvent.ACTION_UP:
-                        if ((System.currentTimeMillis() - lastTouchDown < MIN_CLICK_TIME) &&
-                                ((event.getRawX() - initialTouchX) * (event.getRawX() - initialTouchX) < MAX_CLICK_POS * MAX_CLICK_POS) &&
-                                ((event.getRawY() - initialTouchY) * (event.getRawY() - initialTouchY) < MAX_CLICK_POS * MAX_CLICK_POS)) {
-                            //if we click, we launch the full app
-
-                            showFullApp();
-                        }
-
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        mParams.x = initialX
-                                + (int) (event.getRawX() - initialTouchX);
-                        mParams.y = initialY
-                                + (int) (event.getRawY() - initialTouchY);
-                        mWindowManager.updateViewLayout(mReducedView, mParams);
-                        return true;
-                }
-                return false;
-            }
-        };
-    }
-*/
-    /**
-     * Hide the reduced control and show the full app
-     */
-  /*  private void showFullApp() {
-        mWindowManager.removeView(mReducedView);
-        mWindowManager.addView(mControlView, mParams);
-        mWindowManager.addView(mTargetView, mTargetParams);
-        mIsFullMode = true;
-    }
-
-    /**
-     * Hide the full control and show the reduced app
-     */
-/*    private void reduceApp() {
-        mWindowManager.removeView(mControlView);
-        mWindowManager.removeView(mTargetView);
-        mWindowManager.addView(mReducedView, mParams);
-        mIsFullMode = false;
-    }
-*/
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        if (mIsFullMode) {
-//            if (mControlView != null)
-//                mWindowManager.removeView(mControlView);
-//            mWindowManager.removeView(mTargetView);
-//        } else {
-//            if (mReducedView != null)
-//                mWindowManager.removeView(mReducedView);
-//        }
-//    }
-//
-//    private boolean moveUp() {
-//        mTargetParams.y -= TARGET_SPEED;
-//        mWindowManager.updateViewLayout(mTargetView, mTargetParams);
-//        return true;
-//    }
-//
-//    private boolean moveDown() {
-//        mTargetParams.y += TARGET_SPEED;
-//        mWindowManager.updateViewLayout(mTargetView, mTargetParams);
-//        return true;
-//    }
-//
-//    private boolean moveLeft() {
-//        mTargetParams.x -= TARGET_SPEED;
-//        mWindowManager.updateViewLayout(mTargetView, mTargetParams);
-//        return true;
-//    }
-//
-//    private boolean moveRight() {
-//        mTargetParams.x += TARGET_SPEED;
-//        mWindowManager.updateViewLayout(mTargetView, mTargetParams);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onTouch(View v, MotionEvent motionEvent) {
-//        updateLastEventArrow(v);
-//        switch (motionEvent.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                mIsTouchDown = true;
-//                mMoveViewRunnable.run();
-//                return true;
-//            case MotionEvent.ACTION_UP:
-//                mIsTouchDown = false;
-//                return true;
-//        }
-//
-//        return false;
-//    }
-//
-//    private void updateLastEventArrow(View v) {
-//        switch (v.getId()) {
-//            case R.id.arrow_up:
-//                this.mLastInput = ARROW.UP;
-//                return;
-//            case R.id.arrow_down:
-//                this.mLastInput = ARROW.DOWN;
-//                return;
-//            case R.id.arrow_left:
-//                this.mLastInput = ARROW.LEFT;
-//                return;
-//            case R.id.arrow_right:
-//                this.mLastInput = ARROW.RIGHT;
-//                return;
-//        }
-//    }
-//
-//    @Override
-//    public void onClick(View v) {
-//        switch (v.getId()) {
-//            case R.id.exit_button:
-//                stopSelf();
-//                return;
-//            case R.id.minus_button:
-//                reduceApp();
-//                return;
-//            case R.id.button_click:
-//                proceedClick();
-//                return;
-//        }
-//    }
-//
-//    private enum ARROW {
-//        UP,
-//        DOWN,
-//        LEFT,
-//        RIGHT
-//    }
-
 }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.example.bgcamera.HiddenCameraService;
 
@@ -26,13 +27,10 @@ public class TouchActivity extends Activity {
             super.onCreate(savedInstanceState);
             Log.d("rchtouch","here");
                 startService(new Intent(this, MainService.class));
-                BluetoothConnectionActivity bt=new BluetoothConnectionActivity();
+            View v=getCurrentFocus();
 
-            MainActivity.f=0;
-            Log.d("f in camservice", String.valueOf(MainActivity.f));
-
+            MainActivity.startThread(v);
             finish();
-        startActivity(new Intent(TouchActivity.this,BluetoothConnectionActivity.class));
 
                 }
 }

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\Tasneem\AndroidStudioProjects\lasertest1-master\app\app.iml" filepath="C:\Users\Tasneem\AndroidStudioProjects\lasertest1-master\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bgCamera/bgCamera.iml" filepath="$PROJECT_DIR$/bgCamera/bgCamera.iml" />
       <module fileurl="file://$PROJECT_DIR$/lasertest1-master.iml" filepath="$PROJECT_DIR$/lasertest1-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVLibrary331/openCVLibrary331.iml" filepath="$PROJECT_DIR$/openCVLibrary331/openCVLibrary331.iml" />
